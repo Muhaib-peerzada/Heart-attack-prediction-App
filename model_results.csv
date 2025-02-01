@@ -1,0 +1,3 @@
+Model,Threshold,Accuracy,ROC-AUC
+Logistic Regression,0.3,0.515,0.760670731707317
+Random Forest,0.3,0.54,0.6717479674796748
