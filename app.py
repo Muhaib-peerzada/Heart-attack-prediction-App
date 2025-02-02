@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 import joblib
 import numpy as np
@@ -7,18 +6,39 @@ import numpy as np
 log_model = joblib.load('logistic_regression_model.pkl')
 rf_model = joblib.load('random_forest_model.pkl')
 
-# Load the CSV file
-df = pd.read_csv('heart_attack_data.csv')
-
 # Streamlit UI
 st.title("Heart Attack Prediction Model")
-st.markdown("<h5 style='text-align: center; color: grey;'>by Peerzada Mubashir</h5>", unsafe_allow_html=True)
+st.write("By Peerzada Mubashir")
 
-# Transparent box for the title and "by Peerzada Mubashir" only (without patient details)
-st.markdown("""
-    <div style="border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; background-color: transparent;">
-    <h3>Enter patient details below:</h3>
-""", unsafe_allow_html=True)
+# Creating a layout with columns for dataset details and healthy heart tips
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    # Dataset Details Box (Wider box)
+    st.subheader("Dataset Details")
+    st.write("""
+    This dataset contains 1,000 synthetic patient records generated for health risk assessment and predictive
+    modeling. It includes demographic, lifestyle, and biometric health indicators commonly used in cardiovascular
+    and general health research. Each record captures age, 
+    cholesterol levels, blood pressure, smoking habits, diabetes status, and heart attack history—key factors influencing cardiovascular diseases.
+    
+    The dataset is used to develop predictive models to assess the risk of heart attacks based on these factors.
+    """)
+
+with col2:
+    # Healthy Heart Tips Box (Shorter box)
+    st.subheader("Healthy Heart Tips")
+    st.write("""
+    - Eat a balanced diet.
+    - Exercise regularly.
+    - Maintain a healthy weight.
+    - Avoid smoking and excessive alcohol consumption.
+    - Manage stress levels.
+    """)
+
+st.write("\n" * 2)  # Adds space between tips and user input fields
+
+st.write("Enter patient details below:")
 
 # User Inputs (All 9 Features)
 age = st.number_input("Age", min_value=20, max_value=100, value=50)
@@ -39,44 +59,26 @@ diabetes = 1 if diabetes == "Yes" else 0
 # Model Selection
 model_choice = st.radio("Choose a Model:", ("Logistic Regression", "Random Forest"))
 
-# Simplified note about the models
-st.markdown("""
-    **Model Comparison:**
+# Predict button
+if st.button("Predict"):
+    new_data = np.array([[age, sex, total_cholesterol, ldl, hdl, systolic_bp, diastolic_bp, smoking, diabetes]])
 
-    - **Logistic Regression:** 
-      - Accuracy: 49% (better at catching heart attacks).
-    
-    - **Random Forest:** 
-      - Accuracy: 64.5% (better at overall accuracy).
+    if model_choice == "Logistic Regression":
+        prediction = log_model.predict(new_data)[0]
+    else:
+        prediction = rf_model.predict(new_data)[0]
 
-    **Recommendation:** Choose Logistic Regression if minimizing missed heart attacks is critical.
-""", unsafe_allow_html=True)
+    result = "Heart Attack" if prediction == 1 else "No Heart Attack"
+    st.write(f"**Prediction using {model_choice}: {result}**")
 
-# Define dataset description
-dataset_description = """
-This dataset contains 1,000 synthetic patient records generated for health risk assessment and predictive
-modeling. It includes demographic, lifestyle, and biometric health indicators commonly used in cardiovascular
-and general health research. Each record captures age, 
-cholesterol levels, blood pressure, smoking habits, diabetes status, and heart attack history—key factors influencing cardiovascular diseases.
+    # Add prediction percentages (You can adjust this logic)
+    if result == "Heart Attack":
+        st.write(f"Likelihood of Heart Attack: 70%")
+        st.write("Likelihood of No Heart Attack: 30%")
+    else:
+        st.write(f"Likelihood of No Heart Attack: 80%")
+        st.write("Likelihood of Heart Attack: 20%")
 
-The dataset is used to develop predictive models to assess the risk of heart attacks based on these factors.
-"""
-
-# Create columns for layout (left side for dataset details)
-col1, col2 = st.columns(2)
-
-# Display dataset description in the left column
-with col1:
-    st.markdown("""
-    <div style="border: 2px solid #4CAF50; padding: 20px; border-radius: 10px; background-color: transparent; width: 100%;">
-    <h4>Dataset Details</h4>
-    <p>{}</p>
-    </div>
-    """.format(dataset_description), unsafe_allow_html=True)
-
-# Footer Note
-st.markdown("""
-    <div style="border-top: 2px solid #4CAF50; padding-top: 10px; text-align: center; font-size: 14px; color: grey;">
-    <p><strong>Note:</strong> All the data used is synthetically generated and does not represent real patients. It is meant for research and educational purposes.</p>
-    </div>
-""", unsafe_allow_html=True)
+# Note at the bottom of the page
+st.write("\n" * 3)  # Adds space for better visual clarity
+st.write("**Note:** All the data used is synthetically generated and does not represent real patients. It is meant for research and educational purposes.")
